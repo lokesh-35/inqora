@@ -480,8 +480,29 @@ Related Limitations: ${g.relatedLimitations?.join(', ')}
         return res.status(400).json({ error: 'Question string is required.' });
       }
 
-      const papersToQuery = Array.isArray(papers) && papers.length > 0 ? papers : DEMO_PAPERS;
-      const answer = await answerQuestionRAG(question, papersToQuery, history || []);
+      const existingPapers: Paper[] = Array.isArray(papers) ? papers : [];
+      let livePapers: Paper[] = [];
+
+      try {
+        livePapers = await searchResearchPapers({
+          query: question,
+          question,
+          limit: 6,
+        });
+      } catch (searchError: any) {
+        console.warn('Live chat literature search failed:', searchError?.message || searchError);
+      }
+
+      const seenPaperKeys = new Set<string>();
+      const papersToQuery = [...livePapers, ...existingPapers].filter((paper) => {
+        const key = paper.doi || paper.title?.toLowerCase().replace(/[^a-z0-9]/g, '');
+        if (!key || seenPaperKeys.has(key)) return false;
+        seenPaperKeys.add(key);
+        return true;
+      });
+
+      const groundedPapers = papersToQuery.length > 0 ? papersToQuery : DEMO_PAPERS;
+      const answer = await answerQuestionRAG(question, groundedPapers, history || []);
 
       res.json(answer);
     } catch (err: any) {
