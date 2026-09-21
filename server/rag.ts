@@ -104,12 +104,33 @@ export async function answerQuestionRAG(
   const relevant = retrieveRelevantChunks(question, papers, 6);
   const ai = getGeminiClient();
 
-  if (relevant.length === 0 && papers.length === 0) {
+  if (relevant.length === 0 && papers.length === 0 && !ai) {
     return {
-      text: 'No papers are currently collected in the system. Please upload a research paper PDF, run a search query, or load the demo case study to begin.',
+      text: 'No scholarly sources were found for this question. Try adding more specific keywords or configure GEMINI_API_KEY for a general answer.',
       sources: [],
       isEvidenceSufficient: false,
     };
+  }
+
+  if (relevant.length === 0 && papers.length === 0 && ai) {
+    try {
+      const response = await generateGeminiContent({
+        contents: `Answer the user's question clearly and honestly. No current scholarly sources were found by the connected research indexes, so do not present unsupported claims as researched evidence. State that limitation briefly and provide a useful general answer. If the question requires current facts, recommend verifying them with authoritative sources.\n\nUSER QUESTION: ${question}`,
+      });
+
+      return {
+        text: response.text || 'No scholarly sources were found for this question.',
+        sources: [],
+        isEvidenceSufficient: false,
+      };
+    } catch (err: any) {
+      console.error('General Gemini answer error:', err);
+      return {
+        text: 'No scholarly sources were found for this question, and the AI answer service is temporarily unavailable.',
+        sources: [],
+        isEvidenceSufficient: false,
+      };
+    }
   }
 
   const contextBlocks = relevant.map((item, idx) => {

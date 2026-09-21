@@ -501,8 +501,7 @@ Related Limitations: ${g.relatedLimitations?.join(', ')}
         return true;
       });
 
-      const groundedPapers = papersToQuery.length > 0 ? papersToQuery : DEMO_PAPERS;
-      const answer = await answerQuestionRAG(question, groundedPapers, history || []);
+      const answer = await answerQuestionRAG(question, papersToQuery, history || []);
 
       res.json(answer);
     } catch (err: any) {
