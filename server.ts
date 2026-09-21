@@ -593,7 +593,9 @@ export async function startServer() {
   console.log(`Server running on port ${actualPort}`);
 }
 
-const isDirectRun = Boolean(process.argv[1]) && process.argv[1].includes('server.ts');
+const isDirectRun = Boolean(process.argv[1]) && (
+  process.argv[1].includes('server.ts') || process.argv[1].includes('server.cjs')
+);
 
 if (isDirectRun) {
   startServer().catch((error) => {
