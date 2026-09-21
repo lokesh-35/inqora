@@ -1,0 +1,6 @@
+{
+  "name": "REXA AI",
+  "description": "REXA AI - Explore. Compare. Discover. Search 220M+ peer-reviewed papers, extract methodologies, synthesize consensus, and discover potential research gaps.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

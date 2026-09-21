@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-heading: 'Space Grotesk', sans-serif;
+    --font-sans: 'Karla', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    --font-mono: 'Space Mono', monospace;
+
+    --bg-main: #FAF8F5;
+    --bg-card: #FFFFFF;
+    --text-primary: #202624;
+    --text-secondary: #68736F;
+    --border-color: #FAF8F5;
+
+    --color-forest: #431407;
+    --color-forest-hover: #1E4F49;
+    --color-forest-subtle: #EBF2F0;
+    --color-teal: #D97706;
+    --color-sand: #D97706;
+    --color-sand-subtle: #F9F6F0;
+
+    --evidence-positive: #287A52;
+    --evidence-mixed: #B98228;
+    --evidence-negative: #B84A52;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    selection-background-color: #431407;
+    selection-color: #FFFFFF;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
+  }
+
+  code, pre, .font-mono, .paper-doi, .academic-stat {
+    font-family: var(--font-mono);
+  }
+}
+
+/* Custom Academic Utilities */
+.font-heading {
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+.font-sans {
+  font-family: 'Karla', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+}
+
+.font-mono {
+  font-family: 'Space Mono', monospace;
+}
+
+/* Subtle, high-craft elevation and border transitions for paper cards */
+.papers-list-item {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  will-change: transform, box-shadow;
+}
+
+.papers-list-item:hover {
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 12px -2px rgba(22, 58, 53, 0.06);
+}
+
+/* Restrained subtle scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #FAF8F5;
+}
+::-webkit-scrollbar-thumb {
+  background: #FAF8F5;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B9C2BD;
+}
+
