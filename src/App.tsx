@@ -320,8 +320,8 @@ export default function App() {
         console.warn('Consensus synthesis fallback:', err);
       }
 
-      // Step 5: Deep Review Mode (Limitation clustering and potential gaps)
-      if (options?.isDeepReview || filters.deepReviewMode) {
+      // Step 5: Full research review for every submitted question
+      if (effectiveQuery) {
         setLoadingStep('Clustering recurring limitations & extracting potential research gaps...');
         const gapRes = await fetchApi('/api/analyze-gaps', {
           method: 'POST',
