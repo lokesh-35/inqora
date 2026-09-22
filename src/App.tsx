@@ -40,6 +40,15 @@ const INITIAL_THREADS: ThreadItem[] = [
   },
 ];
 
+interface ThreadSnapshot {
+  papers: Paper[];
+  limitationGroups: LimitationGroup[];
+  potentialGaps: PotentialGap[];
+  researchDirections: ResearchDirection[];
+  consensusData: ConsensusSnapshot | null;
+  chatMessages: ChatMessage[];
+}
+
 export default function App() {
   // Navigation: 'home' (exact Consensus home layout) or 'thread' (Consensus results thread)
   const [currentView, setCurrentView] = useState<'home' | 'thread'>('home');
@@ -69,6 +78,7 @@ export default function App() {
   // Threads History
   const [recentThreads, setRecentThreads] = useState<ThreadItem[]>(INITIAL_THREADS);
   const [activeThreadId, setActiveThreadId] = useState<string>('thread-1');
+  const [threadSnapshots, setThreadSnapshots] = useState<Record<string, ThreadSnapshot>>({});
 
   // Analysis / Research State
   const [papers, setPapers] = useState<Paper[]>(DEMO_PAPERS);
@@ -127,6 +137,21 @@ export default function App() {
     translateDocument(selectedLanguage);
   }, [selectedLanguage, currentView, activeTab, isLoading, isChatLoading]);
 
+  useEffect(() => {
+    if (papers.length === 0 && chatMessages.length === 0) return;
+    setThreadSnapshots((previous) => ({
+      ...previous,
+      [activeThreadId]: {
+        papers,
+        limitationGroups,
+        potentialGaps,
+        researchDirections,
+        consensusData,
+        chatMessages,
+      },
+    }));
+  }, [activeThreadId, papers, limitationGroups, potentialGaps, researchDirections, consensusData, chatMessages]);
+
   // Check health on mount
   useEffect(() => {
     fetchApi('/api/health').catch(() => {
@@ -172,11 +197,13 @@ export default function App() {
       setSearchQuery(thread.title);
       setQuestion(thread.title);
       setTopic(thread.title);
-      setPapers(DEMO_PAPERS);
-      setLimitationGroups(DEMO_LIMITATION_GROUPS);
-      setPotentialGaps(DEMO_POTENTIAL_GAPS);
-      setResearchDirections(DEMO_RESEARCH_DIRECTIONS);
-      setConsensusData(DEMO_CONSENSUS_SNAPSHOT);
+      const snapshot = threadSnapshots[threadId];
+      setPapers(snapshot?.papers || []);
+      setLimitationGroups(snapshot?.limitationGroups || []);
+      setPotentialGaps(snapshot?.potentialGaps || []);
+      setResearchDirections(snapshot?.researchDirections || []);
+      setConsensusData(snapshot?.consensusData || null);
+      setChatMessages(snapshot?.chatMessages || []);
       setActiveTab('overview');
       setCurrentView('thread');
     }
