@@ -56,11 +56,6 @@ export default function App() {
     return saved === 'hi-IN' || saved === 'te-IN' ? saved : 'en-US';
   });
 
-  useEffect(() => {
-    localStorage.setItem('inqora_language', selectedLanguage);
-    translateDocument(selectedLanguage);
-  }, [selectedLanguage, currentView, activeTab, isLoading, isChatLoading]);
-
   // Filters State
   const [filters, setFilters] = useState<ConsensusFilterState>({
     yearRange: 'all',
@@ -126,6 +121,11 @@ export default function App() {
   // Chat State
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
   const [isChatLoading, setIsChatLoading] = useState<boolean>(false);
+
+  useEffect(() => {
+    localStorage.setItem('inqora_language', selectedLanguage);
+    translateDocument(selectedLanguage);
+  }, [selectedLanguage, currentView, activeTab, isLoading, isChatLoading]);
 
   // Check health on mount
   useEffect(() => {
