@@ -25,6 +25,7 @@ import {
 } from './data/demoData';
 import { AlertCircle } from 'lucide-react';
 import { fetchApi } from './lib/api';
+import { SupportedLanguage, translateDocument } from './lib/i18n';
 
 const INITIAL_THREADS: ThreadItem[] = [
   {
@@ -50,7 +51,15 @@ export default function App() {
   const [question, setQuestion] = useState<string>(DEMO_QUERY.question);
   const [keywords, setKeywords] = useState<string>(DEMO_QUERY.keywords);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('en-US');
+  const [selectedLanguage, setSelectedLanguage] = useState<SupportedLanguage>(() => {
+    const saved = localStorage.getItem('inqora_language');
+    return saved === 'hi-IN' || saved === 'te-IN' ? saved : 'en-US';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('inqora_language', selectedLanguage);
+    translateDocument(selectedLanguage);
+  }, [selectedLanguage, currentView, activeTab, isLoading, isChatLoading]);
 
   // Filters State
   const [filters, setFilters] = useState<ConsensusFilterState>({
