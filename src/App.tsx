@@ -198,6 +198,12 @@ export default function App() {
 
     setIsLoading(true);
     setErrorBanner(null);
+    setPapers([]);
+    setLimitationGroups([]);
+    setPotentialGaps([]);
+    setResearchDirections([]);
+    setConsensusData(null);
+    setChatMessages([]);
     setQuestion(effectiveQuery);
     setTopic(effectiveQuery);
 
@@ -347,18 +353,18 @@ export default function App() {
         }
 
         // Formulate future research directions
-        const suggestRes = await fetchApi('/api/suggest-research', {
+        const suggestRes = synthesizedGaps.length > 0 ? await fetchApi('/api/suggest-research', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            gaps: synthesizedGaps.length > 0 ? synthesizedGaps : DEMO_POTENTIAL_GAPS,
+            gaps: synthesizedGaps,
             topic: effectiveQuery,
             question: effectiveQuery,
             language: selectedLanguage,
           }),
-        });
+        }) : null;
 
-        if (suggestRes.ok) {
+        if (suggestRes?.ok) {
           const suggestData = await suggestRes.json();
           if (Array.isArray(suggestData.researchDirections)) {
             setResearchDirections(suggestData.researchDirections);

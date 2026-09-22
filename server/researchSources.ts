@@ -33,8 +33,9 @@ function calculateRelevance(
       matches += 1;
     }
   }
-  const base = 0.6;
-  const bonus = Math.min(0.39, (matches / Math.max(queryTerms.length, 1)) * 0.4);
+  if (matches === 0) return 0;
+  const base = 0.55;
+  const bonus = Math.min(0.45, (matches / Math.max(queryTerms.length, 1)) * 0.45);
   return Number((base + bonus).toFixed(2));
 }
 
@@ -240,9 +241,12 @@ export async function searchResearchPapers(options: SearchOptions): Promise<Pape
   // Sort by relevance score descending
   deduplicated.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
 
-  return deduplicated.slice(0, options.limit || 10).map((paper) => ({
-    ...paper,
-    searchedAt,
-    evidenceType: paper.abstract && paper.abstract !== 'Abstract not available in record' ? 'abstract' : 'metadata',
-  }));
+  return deduplicated
+    .filter((paper) => (paper.relevanceScore || 0) >= 0.65)
+    .slice(0, options.limit || 10)
+    .map((paper) => ({
+      ...paper,
+      searchedAt,
+      evidenceType: paper.abstract && paper.abstract !== 'Abstract not available in record' ? 'abstract' : 'metadata',
+    }));
 }

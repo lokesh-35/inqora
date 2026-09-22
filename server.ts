@@ -415,21 +415,10 @@ Future Work: ${p.futureWork || 'Not reported'}
         }
       }
 
-      // Fallback if parsing was empty
-      if (potentialGaps.length === 0) {
-        potentialGaps = DEMO_POTENTIAL_GAPS;
-      }
-      if (limitationGroups.length === 0) {
-        limitationGroups = DEMO_LIMITATION_GROUPS;
-      }
-
       res.json({ limitationGroups, potentialGaps });
     } catch (err: any) {
-      console.warn('Error in gap analysis, falling back to synthesized review baseline:', err.message);
-      res.json({
-        limitationGroups: DEMO_LIMITATION_GROUPS,
-        potentialGaps: DEMO_POTENTIAL_GAPS,
-      });
+      console.warn('Error in gap analysis:', err.message);
+      res.json({ limitationGroups: [], potentialGaps: [] });
     }
   });
 
@@ -440,7 +429,7 @@ Future Work: ${p.futureWork || 'Not reported'}
       const ai = getGeminiClient();
 
       if (!ai || !Array.isArray(gaps) || gaps.length === 0) {
-        return res.json({ researchDirections: DEMO_RESEARCH_DIRECTIONS });
+        return res.json({ researchDirections: [] });
       }
 
       const gapsSummary = gaps.map((g: PotentialGap, idx: number) => `
@@ -467,21 +456,19 @@ Related Limitations: ${g.relatedLimitations?.join(', ')}
         console.error('Error parsing research directions JSON:', e);
       }
 
-      if (researchDirections.length === 0) {
-        researchDirections = DEMO_RESEARCH_DIRECTIONS;
-      }
+      if (researchDirections.length === 0) return res.json({ researchDirections: [] });
 
       res.json({ researchDirections });
     } catch (err: any) {
       console.warn('Error in research suggestions, falling back to baseline directions:', err.message);
-      res.json({ researchDirections: DEMO_RESEARCH_DIRECTIONS });
+      res.json({ researchDirections: [] });
     }
   });
 
   // 9. RAG Chat endpoint
   app.post('/api/chat', async (req, res) => {
     try {
-      const { question, papers, history } = req.body;
+      const { question, papers, history, language } = req.body;
       if (!question || typeof question !== 'string') {
         return res.status(400).json({ error: 'Question string is required.' });
       }
@@ -507,7 +494,7 @@ Related Limitations: ${g.relatedLimitations?.join(', ')}
         return true;
       });
 
-      const answer = await answerQuestionRAG(question, papersToQuery, history || []);
+      const answer = await answerQuestionRAG(question, papersToQuery, history || [], language);
 
       res.json(answer);
     } catch (err: any) {
@@ -521,7 +508,11 @@ Related Limitations: ${g.relatedLimitations?.join(', ')}
     try {
         const { question, topic, papers, language } = req.body;
         const targetQuery = question || topic || 'Research Question';
-      const paperList: Paper[] = Array.isArray(papers) && papers.length > 0 ? papers : DEMO_PAPERS;
+      const paperList: Paper[] = Array.isArray(papers) ? papers : [];
+
+      if (paperList.length === 0) {
+        return res.json({ consensus: null });
+      }
 
       const ai = getGeminiClient();
       if (!ai) {
