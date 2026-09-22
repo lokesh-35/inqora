@@ -106,18 +106,18 @@ export async function answerQuestionRAG(
   const relevant = retrieveRelevantChunks(question, papers, 6);
   const ai = getGeminiClient();
 
-  if (relevant.length === 0 && papers.length === 0 && !ai) {
+  if (relevant.length === 0 && !ai) {
     return {
-      text: 'No scholarly sources were found for this question. Try adding more specific keywords or configure GEMINI_API_KEY for a general answer.',
+      text: 'I cannot answer this question because the AI service is not configured and no matching evidence was found.',
       sources: [],
       isEvidenceSufficient: false,
     };
   }
 
-  if (relevant.length === 0 && papers.length === 0 && ai) {
+  if (relevant.length === 0 && ai) {
     try {
       const response = await generateGeminiContent({
-        contents: `Answer the user's question clearly and honestly in ${responseLanguage}. No current scholarly sources were found by the connected research indexes, so do not present unsupported claims as researched evidence. State that limitation briefly and provide a useful general answer. If the question requires current facts, recommend verifying them with authoritative sources.\n\nUSER QUESTION: ${question}`,
+        contents: `Answer the user's question clearly and honestly in ${responseLanguage}. No directly matching scholarly evidence was found in the connected research indexes, so begin by saying that this is a general answer rather than a literature-grounded answer. Do not invent citations or claim that the answer comes from research papers. If the question requires current facts, recommend verifying them with authoritative sources.\n\nUSER QUESTION: ${question}`,
       });
 
       return {
