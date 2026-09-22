@@ -25,6 +25,10 @@ import { Paper, LimitationGroup, PotentialGap, ResearchDirection, ConsensusSnaps
 
 dotenv.config();
 
+function responseLanguage(code?: string): string {
+  return code === 'hi-IN' ? 'Hindi' : code === 'te-IN' ? 'Telugu' : 'English';
+}
+
 const upload = multer({
   storage: multer.memoryStorage(),
   limits: { fileSize: 25 * 1024 * 1024 }, // 25MB limit
@@ -186,7 +190,7 @@ export async function createApp() {
   // 5. Paper Analysis endpoint (Gemini structured extraction)
   app.post('/api/analyze-paper', async (req, res) => {
     try {
-      const { paper } = req.body;
+      const { paper, language } = req.body;
       if (!paper) {
         return res.status(400).json({ error: 'Paper payload is required for analysis.' });
       }
@@ -216,7 +220,7 @@ export async function createApp() {
       const contentToAnalyze = (paper.rawText ? paper.rawText.slice(0, 16000) : '') ||
         `Title: ${paper.title}\nAuthors: ${(paper.authors || []).join(', ')}\nYear: ${paper.year}\nAbstract: ${paper.abstract}`;
 
-      const prompt = `${PAPER_EXTRACTION_PROMPT}\n\nPAPER CONTENT:\n${contentToAnalyze}`;
+      const prompt = `${PAPER_EXTRACTION_PROMPT}\n\nReturn explanatory fields in ${responseLanguage(language)}. Keep paper titles, author names, and quoted evidence in their original form where appropriate.\n\nPAPER CONTENT:\n${contentToAnalyze}`;
 
       const response = await generateGeminiContent({
         contents: prompt,
@@ -313,7 +317,7 @@ export async function createApp() {
   // 7. Potential Gap Analysis & Limitation Grouping endpoint
   app.post('/api/analyze-gaps', async (req, res) => {
     try {
-      const { papers, topic, question } = req.body;
+      const { papers, topic, question, language } = req.body;
       if (!Array.isArray(papers) || papers.length === 0) {
         return res.status(400).json({ error: 'Papers are required to perform gap analysis.' });
       }
@@ -338,10 +342,10 @@ Future Work: ${p.futureWork || 'Not reported'}
 `).join('\n---\n');
 
       // 1. Group limitations
-      const limitPrompt = `${LIMITATION_ANALYSIS_PROMPT}\n\nRESEARCH TOPIC: ${topic || 'Academic Research'}\nRESEARCH QUESTION: ${question || 'General Inquiry'}\n\nCOLLECTED PAPERS:\n${papersSummary}`;
+      const limitPrompt = `${LIMITATION_ANALYSIS_PROMPT}\n\nWrite the analysis in ${responseLanguage(language)}.\n\nRESEARCH TOPIC: ${topic || 'Academic Research'}\nRESEARCH QUESTION: ${question || 'General Inquiry'}\n\nCOLLECTED PAPERS:\n${papersSummary}`;
       
       // 2. Identify potential gaps
-      const gapPrompt = `${GAP_ANALYSIS_PROMPT}\n\nRESEARCH TOPIC: ${topic || 'Academic Research'}\nRESEARCH QUESTION: ${question || 'General Inquiry'}\n\nCOLLECTED PAPERS:\n${papersSummary}`;
+      const gapPrompt = `${GAP_ANALYSIS_PROMPT}\n\nWrite the analysis in ${responseLanguage(language)}.\n\nRESEARCH TOPIC: ${topic || 'Academic Research'}\nRESEARCH QUESTION: ${question || 'General Inquiry'}\n\nCOLLECTED PAPERS:\n${papersSummary}`;
 
       const [limitRes, gapRes] = await Promise.allSettled([
         generateGeminiContent({
@@ -430,7 +434,7 @@ Future Work: ${p.futureWork || 'Not reported'}
   // 8. Research Suggestions endpoint
   app.post('/api/suggest-research', async (req, res) => {
     try {
-      const { gaps, topic, question } = req.body;
+      const { gaps, topic, question, language } = req.body;
       const ai = getGeminiClient();
 
       if (!ai || !Array.isArray(gaps) || gaps.length === 0) {
@@ -444,7 +448,7 @@ Why It May Be a Gap: ${g.whyItMayBeAGap}
 Related Limitations: ${g.relatedLimitations?.join(', ')}
 `).join('\n---\n');
 
-      const prompt = `${RESEARCH_SUGGESTIONS_PROMPT}\n\nRESEARCH TOPIC: ${topic || 'Academic Research'}\nRESEARCH QUESTION: ${question || 'General Inquiry'}\n\nPOTENTIAL GAPS IDENTIFIED:\n${gapsSummary}`;
+      const prompt = `${RESEARCH_SUGGESTIONS_PROMPT}\n\nWrite all explanatory fields in ${responseLanguage(language)}.\n\nRESEARCH TOPIC: ${topic || 'Academic Research'}\nRESEARCH QUESTION: ${question || 'General Inquiry'}\n\nPOTENTIAL GAPS IDENTIFIED:\n${gapsSummary}`;
 
       const response = await generateGeminiContent({
         contents: prompt,
@@ -513,8 +517,8 @@ Related Limitations: ${g.relatedLimitations?.join(', ')}
   // 10. Consensus Synthesis endpoint (Consensus.app style consensus meter & AI summary)
   app.post('/api/synthesize-consensus', async (req, res) => {
     try {
-      const { question, topic, papers } = req.body;
-      const targetQuery = question || topic || 'Research Question';
+        const { question, topic, papers, language } = req.body;
+        const targetQuery = question || topic || 'Research Question';
       const paperList: Paper[] = Array.isArray(papers) && papers.length > 0 ? papers : DEMO_PAPERS;
 
       const ai = getGeminiClient();

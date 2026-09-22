@@ -50,6 +50,7 @@ export default function App() {
   const [question, setQuestion] = useState<string>(DEMO_QUERY.question);
   const [keywords, setKeywords] = useState<string>(DEMO_QUERY.keywords);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [selectedLanguage, setSelectedLanguage] = useState<string>('en-US');
 
   // Filters State
   const [filters, setFilters] = useState<ConsensusFilterState>({
@@ -233,6 +234,7 @@ export default function App() {
             topic: effectiveQuery,
             question: effectiveQuery,
             keywords,
+            language: selectedLanguage,
             limit: 6,
           }),
         });
@@ -267,7 +269,7 @@ export default function App() {
           const analyzeRes = await fetchApi('/api/analyze-paper', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ paper: p }),
+            body: JSON.stringify({ paper: p, language: selectedLanguage }),
           });
 
           if (analyzeRes.ok) {
@@ -296,6 +298,7 @@ export default function App() {
             question: effectiveQuery,
             topic: effectiveQuery,
             papers: analyzedPapers,
+            language: selectedLanguage,
           }),
         });
         if (consensusRes.ok) {
@@ -318,6 +321,7 @@ export default function App() {
             papers: analyzedPapers,
             topic: effectiveQuery,
             question: effectiveQuery,
+            language: selectedLanguage,
           }),
         });
 
@@ -341,6 +345,7 @@ export default function App() {
             gaps: synthesizedGaps.length > 0 ? synthesizedGaps : DEMO_POTENTIAL_GAPS,
             topic: effectiveQuery,
             question: effectiveQuery,
+            language: selectedLanguage,
           }),
         });
 
@@ -387,6 +392,7 @@ export default function App() {
           question: text,
           papers,
           history: chatMessages,
+          language: selectedLanguage,
         }),
       });
 
@@ -528,6 +534,8 @@ export default function App() {
             isSidebarCollapsed={isSidebarCollapsed}
             currentUser={currentUser}
             onLogout={handleLogout}
+            selectedLanguage={selectedLanguage}
+            onLanguageChange={setSelectedLanguage}
           />
         ) : (
           <ResearchWorkspace

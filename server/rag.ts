@@ -99,8 +99,10 @@ export function retrieveRelevantChunks(query: string, papers: Paper[], topK = 5)
 export async function answerQuestionRAG(
   question: string,
   papers: Paper[],
-  history: ChatMessage[] = []
+  history: ChatMessage[] = [],
+  language = 'en-US'
 ): Promise<{ text: string; sources: Array<{ paperTitle: string; passage: string; section?: string }>; isEvidenceSufficient: boolean }> {
+  const responseLanguage = language === 'hi-IN' ? 'Hindi' : language === 'te-IN' ? 'Telugu' : 'English';
   const relevant = retrieveRelevantChunks(question, papers, 6);
   const ai = getGeminiClient();
 
@@ -115,7 +117,7 @@ export async function answerQuestionRAG(
   if (relevant.length === 0 && papers.length === 0 && ai) {
     try {
       const response = await generateGeminiContent({
-        contents: `Answer the user's question clearly and honestly. No current scholarly sources were found by the connected research indexes, so do not present unsupported claims as researched evidence. State that limitation briefly and provide a useful general answer. If the question requires current facts, recommend verifying them with authoritative sources.\n\nUSER QUESTION: ${question}`,
+        contents: `Answer the user's question clearly and honestly in ${responseLanguage}. No current scholarly sources were found by the connected research indexes, so do not present unsupported claims as researched evidence. State that limitation briefly and provide a useful general answer. If the question requires current facts, recommend verifying them with authoritative sources.\n\nUSER QUESTION: ${question}`,
       });
 
       return {
@@ -175,7 +177,7 @@ ${papers.map(p => `- ${p.title} (${p.year}). Methods: ${p.methodology || 'N/A'}.
 Provide an evidence-based answer. If evidence is insufficient, explicitly declare: "The available papers do not provide enough evidence to answer this confidently."`;
 
     const response = await generateGeminiContent({
-      contents: prompt,
+      contents: `${prompt}\n\nAnswer entirely in ${responseLanguage}. Keep paper titles and author names unchanged where useful, but write the explanation in ${responseLanguage}.`,
     });
 
     const answerText = response.text || 'The available papers do not provide enough evidence to answer this confidently.';

@@ -29,11 +29,6 @@ const SUPPORTED_LANGUAGES = [
   { code: 'en-US', label: 'English' },
   { code: 'hi-IN', label: 'Hindi' },
   { code: 'te-IN', label: 'Telugu' },
-  { code: 'es-ES', label: 'Spanish' },
-  { code: 'fr-FR', label: 'French' },
-  { code: 'de-DE', label: 'German' },
-  { code: 'zh-CN', label: 'Chinese' },
-  { code: 'ja-JP', label: 'Japanese' },
 ];
 
 interface ConsensusHomeProps {
@@ -53,6 +48,8 @@ interface ConsensusHomeProps {
   isSidebarCollapsed?: boolean;
   currentUser?: UserProfile | null;
   onLogout?: () => void;
+  selectedLanguage: string;
+  onLanguageChange: (language: string) => void;
 }
 
 const CORPUS_OPTIONS = [
@@ -78,13 +75,14 @@ export const ConsensusHome: React.FC<ConsensusHomeProps> = ({
   onRemoveUploadedFile,
   currentUser,
   onLogout,
+  selectedLanguage,
+  onLanguageChange,
 }) => {
   const [selectedCorpus, setSelectedCorpus] = useState<string>('all');
   const [isCorpusOpen, setIsCorpusOpen] = useState<boolean>(false);
   const [isDeepActive, setIsDeepActive] = useState<boolean>(filters.deepReviewMode);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState<boolean>(false);
   const [isListening, setIsListening] = useState<boolean>(false);
-  const [selectedLanguage, setSelectedLanguage] = useState<string>('en-US');
   const [isLanguageOpen, setIsLanguageOpen] = useState<boolean>(false);
   const recognitionRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -430,7 +428,7 @@ export const ConsensusHome: React.FC<ConsensusHomeProps> = ({
                         key={lang.code}
                         type="button"
                         onClick={() => {
-                          setSelectedLanguage(lang.code);
+                          onLanguageChange(lang.code);
                           setIsLanguageOpen(false);
                         }}
                         className="w-full text-left px-3 py-1.5 text-[#242A29] hover:bg-[#FEE7BC] flex items-center justify-between cursor-pointer"
