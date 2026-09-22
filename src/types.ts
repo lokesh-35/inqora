@@ -13,6 +13,8 @@ export interface Paper {
   doi?: string;
   isOpenAccess?: boolean;
   relevanceScore?: number;
+  searchedAt?: string;
+  evidenceType?: 'metadata' | 'abstract' | 'full-text' | 'uploaded-pdf';
   
   // Extracted structured analysis
   methodology?: string;

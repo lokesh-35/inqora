@@ -199,6 +199,7 @@ async function searchCrossref(terms: string[], limit = 5): Promise<Paper[]> {
  * Orchestrate discovery across open research repositories, deduplicating by normalized title.
  */
 export async function searchResearchPapers(options: SearchOptions): Promise<Paper[]> {
+  const searchedAt = new Date().toISOString();
   const terms: string[] = [];
   if (options.topic) terms.push(...options.topic.split(/[,\s]+/).filter(Boolean));
   if (options.keywords) terms.push(...options.keywords.split(/[,\s]+/).filter(Boolean));
@@ -239,5 +240,9 @@ export async function searchResearchPapers(options: SearchOptions): Promise<Pape
   // Sort by relevance score descending
   deduplicated.sort((a, b) => (b.relevanceScore || 0) - (a.relevanceScore || 0));
 
-  return deduplicated.slice(0, options.limit || 10);
+  return deduplicated.slice(0, options.limit || 10).map((paper) => ({
+    ...paper,
+    searchedAt,
+    evidenceType: paper.abstract && paper.abstract !== 'Abstract not available in record' ? 'abstract' : 'metadata',
+  }));
 }

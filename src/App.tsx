@@ -256,9 +256,9 @@ export default function App() {
         }
       }
 
-      // Fallback to demo papers if network is offline or no papers returned
+      // Keep unrelated questions empty rather than presenting demo evidence as real research.
       if (collectedPapers.length === 0) {
-        collectedPapers = DEMO_PAPERS;
+        setErrorBanner('No scholarly sources were found for this inquiry. Try adding specific keywords or upload a PDF.');
       }
 
       setPapers(collectedPapers);
@@ -371,8 +371,8 @@ export default function App() {
     } catch (err: any) {
       console.error('Search error:', err);
       setErrorBanner('Inquiry completed with offline literature fallback.');
-      setPapers(DEMO_PAPERS);
-      setConsensusData(DEMO_CONSENSUS_SNAPSHOT);
+      setPapers([]);
+      setConsensusData(null);
       setCurrentView('thread');
     } finally {
       setIsLoading(false);

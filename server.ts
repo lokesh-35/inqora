@@ -170,6 +170,8 @@ export async function createApp() {
         rawText: text,
         isOpenAccess: true,
         relevanceScore: 0.95,
+        searchedAt: new Date().toISOString(),
+        evidenceType: 'uploaded-pdf',
       };
 
       const chunks = chunkPaperText(paper);

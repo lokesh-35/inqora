@@ -154,7 +154,7 @@ export const PapersList: React.FC<PapersListProps> = ({ papers }) => {
   }
 
   return (
-    <div className="space-y-4">
+              <div className="space-y-4">
       {/* Top Academic Controls Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#FAF8F5]">
         <div className="text-xs text-[#6B7280] flex items-center gap-2">
@@ -233,6 +233,24 @@ export const PapersList: React.FC<PapersListProps> = ({ papers }) => {
                     <span className="italic text-[#4A5568] max-w-xs truncate">
                       {paper.source && paper.source !== 'Demo Data' ? paper.source : 'Peer-Reviewed Literature'}
                     </span>
+                    <span className="text-[#CBD5E1]">·</span>
+                    <span className="text-[10px] text-[#6B7280]">
+                      {paper.evidenceType === 'full-text'
+                        ? 'Full text'
+                        : paper.evidenceType === 'uploaded-pdf'
+                          ? 'Uploaded PDF'
+                          : paper.evidenceType === 'abstract'
+                            ? 'Abstract evidence'
+                            : 'Metadata only'}
+                    </span>
+                    {paper.searchedAt && (
+                      <>
+                        <span className="text-[#CBD5E1]">·</span>
+                        <span className="text-[10px] text-[#6B7280]">
+                          Searched {new Date(paper.searchedAt).toLocaleDateString()}
+                        </span>
+                      </>
+                    )}
                     {paper.studyType && (
                       <>
                         <span className="text-[#CBD5E1]">·</span>
